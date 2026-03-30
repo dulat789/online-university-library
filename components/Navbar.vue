@@ -13,6 +13,13 @@
         </NuxtLink>
 
         <div class="flex items-center gap-2">
+          <UButton
+            variant="ghost"
+            icon="i-heroicons-calendar-days"
+            to="/reservations"
+          >
+            Reserve Room
+          </UButton>
           <template v-if="isLoggedIn">
             <UButton
               variant="ghost"

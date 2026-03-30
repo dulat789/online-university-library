@@ -74,6 +74,36 @@ async function seed() {
       WHERE return_date IS NULL
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS rooms (
+      id   SERIAL PRIMARY KEY,
+      name VARCHAR(50) NOT NULL UNIQUE
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reservations (
+      id               SERIAL PRIMARY KEY,
+      user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      room_id          INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+      reservation_date DATE    NOT NULL,
+      start_time       TIME    NOT NULL,
+      end_time         TIME    NOT NULL,
+      created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    INSERT INTO rooms (name)
+    VALUES
+      ('Study Room 1'),
+      ('Study Room 2'),
+      ('Study Room 3'),
+      ('Study Room 4'),
+      ('Study Room 5')
+    ON CONFLICT DO NOTHING
+  `);
+
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   await pool.query(

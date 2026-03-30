@@ -45,3 +45,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_borrowings_active
 CREATE INDEX IF NOT EXISTS idx_borrowings_active
   ON borrowings(user_id)
   WHERE return_date IS NULL;
+
+-- =============================================
+-- Rooms & Reservations
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS rooms (
+  id    SERIAL PRIMARY KEY,
+  name  VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS reservations (
+  id               SERIAL PRIMARY KEY,
+  user_id          INTEGER  NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  room_id          INTEGER  NOT NULL REFERENCES rooms(id)  ON DELETE CASCADE,
+  reservation_date DATE     NOT NULL,
+  start_time       TIME     NOT NULL,
+  end_time         TIME     NOT NULL,
+  created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reservations_date
+  ON reservations(reservation_date);
+CREATE INDEX IF NOT EXISTS idx_reservations_room_date
+  ON reservations(room_id, reservation_date);
