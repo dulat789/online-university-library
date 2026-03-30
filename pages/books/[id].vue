@@ -16,8 +16,8 @@
         <UAlert
           color="red"
           icon="i-heroicons-exclamation-circle"
-          title="Book not found"
-          description="This book does not exist or has been removed."
+          :title="$t('book.notFound')"
+          :description="$t('book.notFoundDesc')"
         />
         <UButton
           class="mt-4"
@@ -25,7 +25,7 @@
           icon="i-heroicons-arrow-left"
           to="/"
         >
-          Back to catalog
+          {{ $t("book.backToCatalog") }}
         </UButton>
       </div>
 
@@ -38,16 +38,24 @@
           icon="i-heroicons-arrow-left"
           to="/"
         >
-          Back to catalog
+          {{ $t("book.backToCatalog") }}
         </UButton>
 
         <UCard>
           <template #header>
+            <img
+              v-if="coverSrc"
+              :src="coverSrc"
+              :alt="book.title"
+              class="w-full h-64 object-cover rounded-t mb-4"
+            />
             <div class="space-y-1">
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                {{ book.title }}
+                {{ localizedTitle }}
               </h1>
-              <p class="text-gray-500 text-sm">by {{ book.author }}</p>
+              <p class="text-gray-500 text-sm">
+                {{ $t("book.by", { author: book.author }) }}
+              </p>
             </div>
           </template>
 
@@ -55,13 +63,13 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">
-                  Published
+                  {{ $t("book.published") }}
                 </p>
                 <p class="font-medium">{{ book.year ?? "—" }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">
-                  Copies
+                  {{ $t("book.copies") }}
                 </p>
                 <p class="font-medium">
                   <span
@@ -74,31 +82,31 @@
                     {{ book.available_copies }}
                   </span>
                   <span class="text-gray-400">
-                    / {{ book.total_copies }} available</span
+                    / {{ book.total_copies }} {{ $t("book.totalLabel") }}</span
                   >
                 </p>
               </div>
             </div>
 
-            <div v-if="book.description">
+            <div v-if="localizedDescription || book.description">
               <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">
-                Description
+                {{ $t("book.description") }}
               </p>
               <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {{ book.description }}
+                {{ localizedDescription ?? book.description }}
               </p>
             </div>
           </div>
 
           <template #footer>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <!-- Not logged in → Borrow redirects to login -->
               <UButton
                 v-if="!isLoggedIn"
                 icon="i-heroicons-arrow-down-tray"
                 @click="navigateTo(`/login?redirect=/books/${book.id}`)"
               >
-                Borrow
+                {{ $t("book.borrow") }}
               </UButton>
 
               <!-- Logged in, has active borrowing → Return -->
@@ -109,7 +117,7 @@
                 :loading="actionLoading"
                 @click="handleReturn"
               >
-                Return Book
+                {{ $t("book.returnBook") }}
               </UButton>
 
               <!-- Logged in, no active borrowing → Borrow (or disabled) -->
@@ -121,7 +129,9 @@
                 @click="handleBorrow"
               >
                 {{
-                  book.available_copies <= 0 ? "Not Available" : "Borrow Book"
+                  book.available_copies <= 0
+                    ? $t("book.notAvailable")
+                    : $t("book.borrowBook")
                 }}
               </UButton>
             </div>
@@ -136,8 +146,20 @@
 import type { Book } from "~/types/book";
 import type { MyBooksResponse } from "~/types/borrowing";
 
+const COVER_MAP: Record<string, string> = {
+  "1984": "/covers/1984.webp",
+  "Brave New World": "/covers/brave_new_world.jpeg",
+  "The Catcher in the Rye": "/covers/catcher_in_the_rye.jpeg",
+  "Crime and Punishment": "/covers/crime_and_punishment.jpeg",
+  "The Hobbit": "/covers/hobbit.jpeg",
+  "Pride and Prejudice": "/covers/pride_and_prejudice.jpeg",
+  "The Great Gatsby": "/covers/the_great_gatsby.jpeg",
+  "To Kill a Mockingbird": "/covers/to_kill_mockingbird.jpeg",
+};
+
 const route = useRoute();
 const { isLoggedIn } = useAuth();
+const { t } = useI18n();
 const toast = useToast();
 
 const bookId = route.params.id as string;
@@ -156,6 +178,14 @@ const { data: myBooks, refresh: refreshMyBooks } =
     immediate: isLoggedIn.value,
   });
 
+const coverSrc = computed(() =>
+  book.value ? (COVER_MAP[book.value.title] ?? null) : null,
+);
+
+const { localizedTitle, localizedDescription } = useBookLocale(
+  computed(() => book.value?.title ?? ""),
+);
+
 const hasBorrowed = computed(() => {
   if (!isLoggedIn.value || !myBooks.value) return false;
   return myBooks.value.current.some((b) => b.book_id === parseInt(bookId));
@@ -169,15 +199,15 @@ async function handleBorrow() {
     await $fetch(`/api/borrow/${bookId}`, { method: "POST" });
     await Promise.all([refreshBook(), refreshMyBooks()]);
     toast.add({
-      title: "Borrowed!",
-      description: `You have borrowed "${book.value?.title}".`,
+      title: t("book.borrowed"),
+      description: t("book.borrowedDesc", { title: book.value?.title }),
       color: "green",
     });
   } catch (err: unknown) {
     const e = err as { data?: { statusMessage?: string } };
     toast.add({
-      title: "Error",
-      description: e.data?.statusMessage || "Failed to borrow book.",
+      title: t("book.error"),
+      description: e.data?.statusMessage || t("book.failedToBorrow"),
       color: "red",
     });
   } finally {
@@ -191,15 +221,15 @@ async function handleReturn() {
     await $fetch(`/api/return/${bookId}`, { method: "POST" });
     await Promise.all([refreshBook(), refreshMyBooks()]);
     toast.add({
-      title: "Returned!",
-      description: `You have returned "${book.value?.title}".`,
+      title: t("book.returned"),
+      description: t("book.returnedDesc", { title: book.value?.title }),
       color: "green",
     });
   } catch (err: unknown) {
     const e = err as { data?: { statusMessage?: string } };
     toast.add({
-      title: "Error",
-      description: e.data?.statusMessage || "Failed to return book.",
+      title: t("book.error"),
+      description: e.data?.statusMessage || t("book.failedToReturn"),
       color: "red",
     });
   } finally {

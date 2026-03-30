@@ -3,8 +3,10 @@
     <Navbar />
 
     <UContainer class="py-10">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-        My Profile
+      <h1
+        class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8"
+      >
+        {{ $t("profile.title") }}
       </h1>
 
       <!-- Student info card -->
@@ -19,7 +21,7 @@
               <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
                 {{ user.name }} {{ user.surname }}
               </h2>
-              <p class="text-sm text-gray-500">Student</p>
+              <p class="text-sm text-gray-500">{{ $t("profile.student") }}</p>
             </div>
           </div>
         </template>
@@ -27,7 +29,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">
-              Email
+              {{ $t("profile.email") }}
             </p>
             <p class="font-medium text-gray-800 dark:text-gray-200">
               {{ user.email }}
@@ -35,7 +37,7 @@
           </div>
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">
-              Student ID
+              {{ $t("profile.studentId") }}
             </p>
             <p class="font-medium text-gray-800 dark:text-gray-200">
               {{ user.student_id }}
@@ -49,7 +51,9 @@
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-book-open" class="text-primary-500" />
-            <h2 class="text-lg font-semibold">Currently Borrowed</h2>
+            <h2 class="text-lg font-semibold">
+              {{ $t("profile.currentlyBorrowed") }}
+            </h2>
             <UBadge
               v-if="myBooks?.current.length"
               color="primary"
@@ -60,7 +64,7 @@
           </div>
         </template>
 
-        <div v-if="myBooks?.current.length">
+        <div v-if="myBooks?.current.length" class="overflow-x-auto">
           <UTable :rows="myBooks.current" :columns="currentColumns">
             <template #title-data="{ row }">
               <NuxtLink
@@ -70,15 +74,23 @@
                 {{ row.title }}
               </NuxtLink>
             </template>
+            <template #borrow_date-data="{ row }">
+              {{ formatDate(row.borrow_date) }}
+            </template>
+            <template #due_date-data="{ row }">
+              {{ formatDate(row.due_date) }}
+            </template>
             <template #is_overdue-data="{ row }">
               <UBadge :color="row.is_overdue ? 'red' : 'green'" variant="soft">
-                {{ row.is_overdue ? "Overdue" : "Active" }}
+                {{
+                  row.is_overdue ? $t("profile.overdue") : $t("profile.active")
+                }}
               </UBadge>
             </template>
           </UTable>
         </div>
         <p v-else class="text-gray-400 text-center py-6">
-          No books currently borrowed.
+          {{ $t("profile.noBorrowed") }}
         </p>
       </UCard>
 
@@ -87,11 +99,13 @@
         <template #header>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-clock" class="text-gray-400" />
-            <h2 class="text-lg font-semibold">Borrow History</h2>
+            <h2 class="text-lg font-semibold">
+              {{ $t("profile.borrowHistory") }}
+            </h2>
           </div>
         </template>
 
-        <div v-if="myBooks?.history.length">
+        <div v-if="myBooks?.history.length" class="overflow-x-auto">
           <UTable :rows="myBooks.history" :columns="historyColumns">
             <template #title-data="{ row }">
               <NuxtLink
@@ -101,10 +115,16 @@
                 {{ row.title }}
               </NuxtLink>
             </template>
+            <template #borrow_date-data="{ row }">
+              {{ formatDate(row.borrow_date) }}
+            </template>
+            <template #return_date-data="{ row }">
+              {{ formatDate(row.return_date) }}
+            </template>
           </UTable>
         </div>
         <p v-else class="text-gray-400 text-center py-6">
-          No borrowing history yet.
+          {{ $t("profile.noHistory") }}
         </p>
       </UCard>
     </UContainer>
@@ -116,19 +136,21 @@ import type { MyBooksResponse } from "~/types/borrowing";
 
 definePageMeta({ middleware: "auth" });
 
+const { t } = useI18n();
 const { user } = useAuth();
 const { data: myBooks } = await useFetch<MyBooksResponse>("/api/my-books");
+const { formatDate } = useLocalizedDate();
 
-const currentColumns = [
-  { key: "title", label: "Book Title" },
-  { key: "borrow_date", label: "Borrowed On" },
-  { key: "due_date", label: "Due Date" },
-  { key: "is_overdue", label: "Status" },
-];
+const currentColumns = computed(() => [
+  { key: "title", label: t("profile.bookTitle") },
+  { key: "borrow_date", label: t("profile.borrowedOn") },
+  { key: "due_date", label: t("profile.dueDate") },
+  { key: "is_overdue", label: t("profile.status") },
+]);
 
-const historyColumns = [
-  { key: "title", label: "Book Title" },
-  { key: "borrow_date", label: "Borrowed On" },
-  { key: "return_date", label: "Returned On" },
-];
+const historyColumns = computed(() => [
+  { key: "title", label: t("profile.bookTitle") },
+  { key: "borrow_date", label: t("profile.borrowedOn") },
+  { key: "return_date", label: t("profile.returnedOn") },
+]);
 </script>

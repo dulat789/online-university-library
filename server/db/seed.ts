@@ -42,16 +42,43 @@ async function seed() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS books (
       id SERIAL PRIMARY KEY,
-      title VARCHAR(500) NOT NULL,
+      title VARCHAR(500) NOT NULL UNIQUE,
       author VARCHAR(255) NOT NULL,
       description TEXT,
       year INTEGER CHECK (year > 0),
+      cover_url VARCHAR(500),
       total_copies INTEGER NOT NULL DEFAULT 1 CHECK (total_copies > 0),
       available_copies INTEGER NOT NULL DEFAULT 1
         CONSTRAINT chk_available_copies
           CHECK (available_copies >= 0 AND available_copies <= total_copies),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
+  `);
+
+  // Add cover_url column to existing databases that predate this migration
+  await pool.query(
+    `ALTER TABLE books ADD COLUMN IF NOT EXISTS cover_url VARCHAR(500)`,
+  );
+
+  // Remove duplicate books, keeping the one with the lowest id per title
+  await pool.query(`
+    DELETE FROM books
+    WHERE id NOT IN (
+      SELECT MIN(id) FROM books GROUP BY title
+    )
+  `);
+
+  // Add unique constraint on title if not already present
+  await pool.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'books_title_key' AND conrelid = 'books'::regclass
+      ) THEN
+        ALTER TABLE books ADD CONSTRAINT books_title_key UNIQUE (title);
+      END IF;
+    END $$
   `);
 
   await pool.query(`
@@ -116,17 +143,17 @@ async function seed() {
   );
 
   await pool.query(`
-    INSERT INTO books (title, author, description, year, total_copies, available_copies)
+    INSERT INTO books (title, author, description, year, cover_url, total_copies, available_copies)
     VALUES
-      ('The Great Gatsby',        'F. Scott Fitzgerald', 'A story of wealth, obsession and the American Dream set in the Jazz Age.', 1925, 3, 3),
-      ('To Kill a Mockingbird',   'Harper Lee',          'A classic of modern American literature tackling racial injustice in the Deep South.', 1960, 2, 2),
-      ('1984',                    'George Orwell',       'A dystopian novel about totalitarianism, surveillance, and the cost of truth.', 1949, 4, 4),
-      ('Pride and Prejudice',     'Jane Austen',         'A romantic novel of manners following Elizabeth Bennet as she navigates society and love.', 1813, 2, 2),
-      ('The Catcher in the Rye',  'J.D. Salinger',       'Coming-of-age story narrated by the cynical and disenchanted Holden Caulfield.', 1951, 3, 3),
-      ('Brave New World',         'Aldous Huxley',       'A futuristic society built on happiness at the cost of freedom and individuality.', 1932, 2, 2),
-      ('The Hobbit',              'J.R.R. Tolkien',      'Bilbo Baggins embarks on an unexpected quest with a group of dwarves and the wizard Gandalf.', 1937, 3, 3),
-      ('Crime and Punishment',    'Fyodor Dostoevsky',   'A psychological drama about guilt, morality, and redemption in 19th-century Russia.', 1866, 2, 2)
-    ON CONFLICT DO NOTHING
+      ('The Great Gatsby',       'F. Scott Fitzgerald', 'A story of wealth, obsession and the American Dream set in the Jazz Age.',                              1925, '/covers/the_great_gatsby.jpeg',       3, 3),
+      ('To Kill a Mockingbird',  'Harper Lee',          'A classic of modern American literature tackling racial injustice in the Deep South.',                 1960, '/covers/to_kill_mockingbird.jpeg',    2, 2),
+      ('1984',                   'George Orwell',       'A dystopian novel about totalitarianism, surveillance, and the cost of truth.',                        1949, '/covers/1984.webp',                   4, 4),
+      ('Pride and Prejudice',    'Jane Austen',         'A romantic novel of manners following Elizabeth Bennet as she navigates society and love.',            1813, '/covers/pride_and_prejudice.jpeg',    2, 2),
+      ('The Catcher in the Rye', 'J.D. Salinger',       'Coming-of-age story narrated by the cynical and disenchanted Holden Caulfield.',                      1951, '/covers/catcher_in_the_rye.jpeg',     3, 3),
+      ('Brave New World',        'Aldous Huxley',       'A futuristic society built on happiness at the cost of freedom and individuality.',                    1932, '/covers/brave_new_world.jpeg',        2, 2),
+      ('The Hobbit',             'J.R.R. Tolkien',      'Bilbo Baggins embarks on an unexpected quest with a group of dwarves and the wizard Gandalf.',        1937, '/covers/hobbit.jpeg',                 3, 3),
+      ('Crime and Punishment',   'Fyodor Dostoevsky',   'A psychological drama about guilt, morality, and redemption in 19th-century Russia.',                 1866, '/covers/crime_and_punishment.jpeg',   2, 2)
+    ON CONFLICT (title) DO UPDATE SET cover_url = EXCLUDED.cover_url
   `);
 
   // Seed sample borrowings only if the table is empty

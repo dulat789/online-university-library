@@ -2,12 +2,16 @@
   <div>
     <Navbar />
 
-    <UContainer class="py-10">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-          Library Catalog
+    <NewsCarousel />
+
+    <UContainer class="py-6 sm:py-10">
+      <div class="mb-6 sm:mb-8">
+        <h1
+          class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1"
+        >
+          {{ $t("catalog.title") }}
         </h1>
-        <p class="text-gray-500">Browse and search our collection of books</p>
+        <p class="text-gray-500">{{ $t("catalog.subtitle") }}</p>
       </div>
 
       <SearchBar v-model="searchQuery" class="mb-6" />
@@ -29,7 +33,11 @@
       <div v-else class="flex flex-col items-center py-16 text-gray-400 gap-3">
         <UIcon name="i-heroicons-magnifying-glass" class="text-5xl" />
         <p class="text-lg">
-          No books found{{ searchQuery ? ` for "${searchQuery}"` : "" }}
+          {{
+            searchQuery
+              ? $t("catalog.noBooksFor", { query: searchQuery })
+              : $t("catalog.noBooks")
+          }}
         </p>
       </div>
     </UContainer>

@@ -2,7 +2,7 @@
   <UInput
     v-model="model"
     icon="i-heroicons-magnifying-glass"
-    placeholder="Search by title or author…"
+    :placeholder="$t('search.placeholder')"
     size="lg"
     class="w-full max-w-xl"
     :ui="{ icon: { trailing: { pointer: '' } } }"

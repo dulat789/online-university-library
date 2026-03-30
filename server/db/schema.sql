@@ -14,10 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS books (
   id                SERIAL PRIMARY KEY,
-  title             VARCHAR(500)  NOT NULL,
+  title             VARCHAR(500)  NOT NULL UNIQUE,
   author            VARCHAR(255)  NOT NULL,
   description       TEXT,
   year              INTEGER       CHECK (year > 0),
+  cover_url         VARCHAR(500),
   total_copies      INTEGER  NOT NULL DEFAULT 1  CHECK (total_copies > 0),
   available_copies  INTEGER  NOT NULL DEFAULT 1
                       CONSTRAINT chk_available_copies

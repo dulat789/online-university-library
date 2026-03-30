@@ -1,0 +1,155 @@
+{
+  "nav": {
+    "library": "University Library",
+    "reserveRoom": "Reserve Room",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "catalog": {
+    "title": "Library Catalog",
+    "subtitle": "Browse and search our collection of books",
+    "noBooks": "No books found",
+    "noBooksFor": "No books found for \"{query}\""
+  },
+  "search": {
+    "placeholder": "Search by title or author…"
+  },
+  "book": {
+    "by": "by {author}",
+    "published": "Published",
+    "copies": "Copies",
+    "available": "{count} available",
+    "totalLabel": "total",
+    "notAvailable": "Not available",
+    "description": "Description",
+    "borrow": "Borrow",
+    "borrowBook": "Borrow Book",
+    "returnBook": "Return Book",
+    "backToCatalog": "Back to catalog",
+    "notFound": "Book not found",
+    "notFoundDesc": "This book does not exist or has been removed.",
+    "borrowed": "Borrowed!",
+    "borrowedDesc": "You have borrowed \"{title}\".",
+    "returned": "Returned!",
+    "returnedDesc": "You have returned \"{title}\".",
+    "error": "Error",
+    "failedToBorrow": "Failed to borrow book.",
+    "failedToReturn": "Failed to return book."
+  },
+  "login": {
+    "title": "Student Login",
+    "subtitle": "Sign in with your university credentials",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "failed": "Login failed. Please try again."
+  },
+  "profile": {
+    "title": "My Profile",
+    "student": "Student",
+    "email": "Email",
+    "studentId": "Student ID",
+    "currentlyBorrowed": "Currently Borrowed",
+    "noBorrowed": "No books currently borrowed.",
+    "borrowHistory": "Borrow History",
+    "noHistory": "No borrowing history yet.",
+    "bookTitle": "Book Title",
+    "borrowedOn": "Borrowed On",
+    "dueDate": "Due Date",
+    "returnedOn": "Returned On",
+    "status": "Status",
+    "overdue": "Overdue",
+    "active": "Active"
+  },
+  "reservations": {
+    "title": "Room Reservations",
+    "subtitle": "Reserve a study room within library opening hours",
+    "selectDate": "Select Date",
+    "libraryHours": "Library hours",
+    "guestTitle": "Log in to reserve a room",
+    "guestDesc": "You can view current reservations below. Log in to make or cancel your own bookings.",
+    "roomAvailability": "Room Availability",
+    "availableLabel": "Available",
+    "reservedLabel": "Reserved",
+    "yourReservation": "Your reservation",
+    "timeSlot": "Time slot",
+    "reserve": "Reserve",
+    "cancel": "Cancel",
+    "you": "you",
+    "reservedSuccess": "Room reserved!",
+    "reservedDesc": "{start} – {end} on {date}",
+    "reservationFailed": "Reservation failed",
+    "cancelled": "Reservation cancelled",
+    "cancelFailed": "Failed to cancel",
+    "tryAgain": "Please try again",
+    "confirmCancel": "Are you sure you want to cancel this reservation?"
+  },
+  "news": {
+    "eyebrow": "Latest Updates",
+    "title": "Library News",
+    "subtitle": "Stay up to date with announcements, new arrivals, and events from our university library.",
+    "prev": "Previous slide",
+    "next": "Next slide",
+    "goTo": "Go to slide",
+    "item1": {
+      "category": "New Arrivals",
+      "title": "Spring 2026 Book Collection Has Arrived",
+      "desc": "Over 300 new titles across science, humanities, and technology have been added to our shelves. Visit the New Arrivals section on the ground floor to explore the latest additions."
+    },
+    "item2": {
+      "category": "Announcement",
+      "title": "Extended Hours During Finals Week",
+      "desc": "The library will be open 24 hours a day from April 20 through May 5 to support students during the final examination period. Quiet study zones will be fully staffed."
+    },
+    "item3": {
+      "category": "Digital Resources",
+      "title": "50,000+ E-Books Now Accessible via New Portal",
+      "desc": "Our partnership with leading academic publishers gives every enrolled student unlimited access to over 50,000 e-books and 200 research journals through the new Digital Library Portal."
+    },
+    "item4": {
+      "category": "Events",
+      "title": "Reading Club Kicks Off Its Spring Season",
+      "desc": "Join fellow students every Thursday at 6 PM in Reading Room B for our popular Reading Club. This semester we explore contemporary Central Asian Literature. All levels welcome."
+    },
+    "item5": {
+      "category": "Facility",
+      "title": "Silent Study Zone Expansion Completed",
+      "desc": "Following months of renovation, our silent study zone on the third floor now features 80 new ergonomic workstations, improved lighting, and high-speed charging points at every seat."
+    }
+  },
+  "bookData": {
+    "1984": {
+      "title": "1984",
+      "desc": "A dystopian novel about totalitarianism, surveillance, and the cost of truth."
+    },
+    "brave_new_world": {
+      "title": "Brave New World",
+      "desc": "A futuristic society built on happiness at the cost of freedom and individuality."
+    },
+    "crime_and_punishment": {
+      "title": "Crime and Punishment",
+      "desc": "A psychological drama about guilt, morality, and redemption in 19th-century Russia."
+    },
+    "pride_and_prejudice": {
+      "title": "Pride and Prejudice",
+      "desc": "A romantic novel of manners following Elizabeth Bennet as she navigates society and love."
+    },
+    "the_catcher_in_the_rye": {
+      "title": "The Catcher in the Rye",
+      "desc": "A coming-of-age story narrated by the cynical and disenchanted Holden Caulfield."
+    },
+    "the_great_gatsby": {
+      "title": "The Great Gatsby",
+      "desc": "A story of wealth, obsession and the American Dream set in the Jazz Age."
+    },
+    "the_hobbit": {
+      "title": "The Hobbit",
+      "desc": "Bilbo Baggins embarks on an unexpected quest with a group of dwarves and the wizard Gandalf."
+    },
+    "to_kill_a_mockingbird": {
+      "title": "To Kill a Mockingbird",
+      "desc": "A classic of modern American literature tackling racial injustice in the Deep South."
+    }
+  }
+}

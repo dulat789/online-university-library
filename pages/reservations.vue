@@ -6,11 +6,13 @@
       <div class="space-y-6">
         <!-- Header -->
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Room Reservations
+          <h1
+            class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"
+          >
+            {{ $t("reservations.title") }}
           </h1>
           <p class="mt-1 text-sm text-gray-500">
-            Reserve a study room within library opening hours
+            {{ $t("reservations.subtitle") }}
           </p>
         </div>
 
@@ -22,7 +24,7 @@
                 for="reservation-date"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                Select Date
+                {{ $t("reservations.selectDate") }}
               </label>
               <input
                 id="reservation-date"
@@ -34,7 +36,7 @@
             </div>
             <div class="shrink-0 sm:text-right">
               <p class="text-xs text-gray-400 uppercase tracking-wide">
-                Library hours
+                {{ $t("reservations.libraryHours") }}
               </p>
               <p class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ libraryHoursLabel }}
@@ -50,8 +52,8 @@
           icon="i-heroicons-information-circle"
           color="blue"
           variant="subtle"
-          title="Log in to reserve a room"
-          description="You can view current reservations below. Log in to make or cancel your own bookings."
+          :title="$t('reservations.guestTitle')"
+          :description="$t('reservations.guestDesc')"
         />
 
         <!-- Loading state -->
@@ -65,31 +67,31 @@
         <!-- Reservation grid -->
         <UCard v-else>
           <template #header>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
               <UIcon name="i-heroicons-table-cells" class="text-primary-500" />
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Room Availability
+                {{ $t("reservations.roomAvailability") }}
               </h2>
               <div
-                class="ml-auto flex items-center gap-3 text-xs text-gray-500"
+                class="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500"
               >
                 <span class="flex items-center gap-1">
                   <span
                     class="inline-block w-3 h-3 rounded-sm bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700"
                   ></span>
-                  Available
+                  {{ $t("reservations.availableLabel") }}
                 </span>
                 <span class="flex items-center gap-1">
                   <span
                     class="inline-block w-3 h-3 rounded-sm bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700"
                   ></span>
-                  Reserved
+                  {{ $t("reservations.reservedLabel") }}
                 </span>
                 <span class="flex items-center gap-1">
                   <span
                     class="inline-block w-3 h-3 rounded-sm bg-primary-100 dark:bg-primary-900/40 border border-primary-300 dark:border-primary-700"
                   ></span>
-                  Your reservation
+                  {{ $t("reservations.yourReservation") }}
                 </span>
               </div>
             </div>
@@ -102,7 +104,7 @@
                   <th
                     class="py-3 px-4 text-left font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 w-[130px]"
                   >
-                    Time slot
+                    {{ $t("reservations.timeSlot") }}
                   </th>
                   <th
                     v-for="room in rooms"
@@ -150,7 +152,9 @@
                           variant="subtle"
                           class="w-full justify-center"
                         >
-                          {{ cell.reservation.user_name }} (you)
+                          {{ cell.reservation.user_name }} ({{
+                            $t("reservations.you")
+                          }})
                         </UBadge>
                         <UButton
                           size="xs"
@@ -160,7 +164,7 @@
                           class="w-full justify-center"
                           @click="cancelReservation(cell.reservation.id)"
                         >
-                          Cancel
+                          {{ $t("reservations.cancel") }}
                         </UButton>
                       </div>
                     </template>
@@ -194,7 +198,7 @@
                         "
                         @click="makeReservation(cell.room.id, row.slot)"
                       >
-                        Reserve
+                        {{ $t("reservations.reserve") }}
                       </UButton>
                     </template>
 
@@ -203,7 +207,7 @@
                       <span
                         class="text-xs font-medium text-green-600 dark:text-green-400"
                       >
-                        Available
+                        {{ $t("reservations.availableLabel") }}
                       </span>
                     </template>
                   </td>
@@ -221,20 +225,15 @@
 import type { Room, Reservation } from "~/types/reservation";
 
 const { isLoggedIn, user } = useAuth();
+const { t } = useI18n();
 const toast = useToast();
+const { formatDayLabel } = useLocalizedDate();
 
 // ── Date helpers ────────────────────────────────────────────────
 const today = new Date().toISOString().split("T")[0];
 const selectedDate = ref(today);
 
-const dayLabel = computed(() => {
-  const d = new Date(selectedDate.value + "T12:00:00");
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-});
+const dayLabel = computed(() => formatDayLabel(selectedDate.value));
 
 // ── Library hours ───────────────────────────────────────────────
 const libraryHours = computed(() => {
@@ -329,16 +328,20 @@ async function makeReservation(
       },
     });
     toast.add({
-      title: "Room reserved!",
-      description: `${slot.start} – ${slot.end} on ${selectedDate.value}`,
+      title: t("reservations.reservedSuccess"),
+      description: t("reservations.reservedDesc", {
+        start: slot.start,
+        end: slot.end,
+        date: selectedDate.value,
+      }),
       color: "green",
       icon: "i-heroicons-check-circle",
     });
     await refresh();
   } catch (err: any) {
     toast.add({
-      title: "Reservation failed",
-      description: err.data?.statusMessage ?? "Please try again",
+      title: t("reservations.reservationFailed"),
+      description: err.data?.statusMessage ?? t("reservations.tryAgain"),
       color: "red",
       icon: "i-heroicons-x-circle",
     });
@@ -351,20 +354,20 @@ async function makeReservation(
 const cancellingId = ref<number | null>(null);
 
 async function cancelReservation(id: number) {
-  if (!confirm("Are you sure you want to cancel this reservation?")) return;
+  if (!confirm(t("reservations.confirmCancel"))) return;
   cancellingId.value = id;
   try {
     await $fetch(`/api/reservations/${id}`, { method: "DELETE" });
     toast.add({
-      title: "Reservation cancelled",
+      title: t("reservations.cancelled"),
       color: "green",
       icon: "i-heroicons-check-circle",
     });
     await refresh();
   } catch (err: any) {
     toast.add({
-      title: "Failed to cancel",
-      description: err.data?.statusMessage ?? "Please try again",
+      title: t("reservations.cancelFailed"),
+      description: err.data?.statusMessage ?? t("reservations.tryAgain"),
       color: "red",
       icon: "i-heroicons-x-circle",
     });

@@ -4,8 +4,14 @@
     @click="navigateTo(`/books/${book.id}`)"
   >
     <template #header>
-      <h3 class="font-semibold text-base line-clamp-2 leading-snug">
-        {{ book.title }}
+      <img
+        v-if="COVER_MAP[book.title]"
+        :src="COVER_MAP[book.title]"
+        :alt="localizedTitle"
+        class="w-full h-48 object-cover rounded-t"
+      />
+      <h3 class="font-semibold text-base line-clamp-2 leading-snug mt-2">
+        {{ localizedTitle }}
       </h3>
     </template>
 
@@ -30,8 +36,8 @@
       >
         {{
           book.available_copies > 0
-            ? `${book.available_copies} available`
-            : "Not available"
+            ? $t("book.available", { count: book.available_copies })
+            : $t("book.notAvailable")
         }}
       </UBadge>
     </template>
@@ -41,5 +47,18 @@
 <script setup lang="ts">
 import type { Book } from "~/types/book";
 
-defineProps<{ book: Book }>();
+const props = defineProps<{ book: Book }>();
+
+const { localizedTitle } = useBookLocale(computed(() => props.book.title));
+
+const COVER_MAP: Record<string, string> = {
+  "1984": "/covers/1984.webp",
+  "Brave New World": "/covers/brave_new_world.jpeg",
+  "The Catcher in the Rye": "/covers/catcher_in_the_rye.jpeg",
+  "Crime and Punishment": "/covers/crime_and_punishment.jpeg",
+  "The Hobbit": "/covers/hobbit.jpeg",
+  "Pride and Prejudice": "/covers/pride_and_prejudice.jpeg",
+  "The Great Gatsby": "/covers/the_great_gatsby.jpeg",
+  "To Kill a Mockingbird": "/covers/to_kill_mockingbird.jpeg",
+};
 </script>
