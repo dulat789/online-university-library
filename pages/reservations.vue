@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    
 
     <UContainer class="py-8">
       <div class="space-y-6">

@@ -1,7 +1,6 @@
-// Prevent logged-in users from visiting the login page
-export default defineNuxtRouteMiddleware(() => {
-  const { isLoggedIn } = useAuth();
+export default defineNuxtRouteMiddleware((to, from) => {
+  const { isLoggedIn } = useAuth()
   if (isLoggedIn.value) {
-    return navigateTo("/");
+    return navigateTo('/')
   }
-});
+})

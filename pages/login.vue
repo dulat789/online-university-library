@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    
 
     <UContainer class="py-8 sm:py-16">
       <div class="max-w-md mx-auto">

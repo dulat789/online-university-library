@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    
 
     <UContainer class="py-8">
       <!-- Loading state -->
@@ -100,6 +100,15 @@
 
           <template #footer>
             <div class="flex flex-wrap items-center gap-3">
+              <!-- НОВАЯ КНОПКА "ЧИТАТЬ ОНЛАЙН" (видна всем) -->
+              <UButton
+                icon="i-heroicons-book-open"
+                color="green"
+                @click="handleReadClick"
+              >
+                {{ $t('book.readOnline') }}
+              </UButton>
+
               <!-- Not logged in → Borrow redirects to login -->
               <UButton
                 v-if="!isLoggedIn"
@@ -158,7 +167,7 @@ const COVER_MAP: Record<string, string> = {
 };
 
 const route = useRoute();
-const { isLoggedIn } = useAuth();
+const { isLoggedIn } = useAuth(); // только один раз!
 const { t } = useI18n();
 const toast = useToast();
 
@@ -181,6 +190,14 @@ const { data: myBooks, refresh: refreshMyBooks } =
 const coverSrc = computed(() =>
   book.value ? (COVER_MAP[book.value.title] ?? null) : null,
 );
+
+// Функция для кнопки "Читать онлайн"
+function handleReadClick() {
+  if (!isLoggedIn.value) {
+    return navigateTo(`/login?redirect=/books/read/${bookId}`);
+  }
+  return navigateTo(`/books/read/${bookId}`);
+}
 
 const { localizedTitle, localizedDescription } = useBookLocale(
   computed(() => book.value?.title ?? ""),

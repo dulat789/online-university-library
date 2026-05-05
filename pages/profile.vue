@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    
 
     <UContainer class="py-10">
       <h1

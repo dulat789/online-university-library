@@ -4,7 +4,8 @@
     "reserveRoom": "Reserve Room",
     "profile": "Profile",
     "logout": "Logout",
-    "login": "Login"
+    "login": "Login",
+    "register": "Sign up"
   },
   "catalog": {
     "title": "Library Catalog",
@@ -35,7 +36,8 @@
     "returnedDesc": "You have returned \"{title}\".",
     "error": "Error",
     "failedToBorrow": "Failed to borrow book.",
-    "failedToReturn": "Failed to return book."
+    "failedToReturn": "Failed to return book.",
+    "readOnline": "Read online"
   },
   "login": {
     "title": "Student Login",
@@ -43,7 +45,19 @@
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
-    "failed": "Login failed. Please try again."
+    "failed": "Login failed. Please try again.",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Sign up"
+  },
+  "register": {
+  "title": "Student Registration",
+  "subtitle": "Create an account to access the library",
+  "name": "Name",
+  "email": "Email",
+  "password": "Password",
+  "submit": "Register",
+  "haveAccount": "Already have an account?",
+  "loginLink": "Sign in"
   },
   "profile": {
     "title": "My Profile",
