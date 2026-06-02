@@ -16,6 +16,13 @@
   "search": {
     "placeholder": "Search by title or author…"
   },
+    "chat": {
+    "title": "Library Assistant",
+    "placeholder": "Ask a question...",
+    "typing": "Typing...",
+    "greeting": "Hello! I am a library assistant. How can I help?",
+    "error": "Sorry, an error occurred. Please try again later."
+  },
   "book": {
     "by": "by {author}",
     "published": "Published",

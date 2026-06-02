@@ -12,7 +12,7 @@
     <UCard v-else class="w-80 sm:w-96 shadow-xl">
       <template #header>
         <div class="flex justify-between items-center">
-          <h3 class="font-bold text-lg">Библиотечный помощник</h3>
+          <h3 class="font-bold text-lg">{{ t('chat.title') }}</h3>
           <UButton variant="ghost" icon="i-heroicons-x-mark" @click="isOpen = false" />
         </div>
       </template>
@@ -33,7 +33,7 @@
         </div>
         <div v-if="loading" class="flex justify-start">
           <div class="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm">
-            Печатает...
+            {{ t('chat.typing') }}
           </div>
         </div>
       </div>
@@ -42,7 +42,7 @@
         <form @submit.prevent="sendMessage" class="flex gap-2">
           <UInput
             v-model="inputMessage"
-            placeholder="Задайте вопрос..."
+            :placeholder="t('chat.placeholder')"
             class="flex-1"
             autocomplete="off"
           />
@@ -54,12 +54,27 @@
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue'
+import { useI18n } from '#imports'
+
+const { t, locale } = useI18n()
+const currentLocale = computed(() => locale.value)
+
 const isOpen = ref(false)
 const inputMessage = ref('')
 const loading = ref(false)
+
+// Начальное сообщение (будет переведено при смене языка)
 const messages = ref([
-  { role: 'assistant', content: 'Здравствуйте! Я библиотечный помощник. Чем могу помочь?' }
+  { role: 'assistant', content: t('chat.greeting') }
 ])
+
+// При смене языка обновляем приветствие (если это единственное сообщение)
+watch(locale, () => {
+  if (messages.value.length === 1 && messages.value[0].role === 'assistant') {
+    messages.value[0].content = t('chat.greeting')
+  }
+})
 
 async function sendMessage() {
   const text = inputMessage.value.trim()
@@ -70,11 +85,17 @@ async function sendMessage() {
   loading.value = true
 
   try {
-    const response = await $fetch('/api/chat', { method: 'POST', body: { message: text } })
+    const response = await $fetch('/api/chat', {
+      method: 'POST',
+      body: {
+        message: text,
+        locale: currentLocale.value
+      }
+    })
     messages.value.push({ role: 'assistant', content: response.reply })
   } catch (error) {
     console.error(error)
-    messages.value.push({ role: 'assistant', content: 'Извините, произошла ошибка. Попробуйте позже.' })
+    messages.value.push({ role: 'assistant', content: t('chat.error') })
   } finally {
     loading.value = false
     setTimeout(() => {
