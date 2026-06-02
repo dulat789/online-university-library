@@ -6,13 +6,34 @@ const openai = new OpenAI({
 })
 
 export default defineEventHandler(async (event) => {
-  const { message, locale = 'ru' } = await readBody(event)
+  const { message, locale } = await readBody(event)
 
   if (!message || typeof message !== 'string') {
     throw createError({ statusCode: 400, message: 'Сообщение не предоставлено' })
   }
 
-  // === ВАШИ РЕАЛЬНЫЕ КНИГИ ===
+  // === ОПРЕДЕЛЯЕМ РЕАЛЬНЫЙ ЯЗЫК ПО ТЕКСТУ ===
+  function detectLanguage(text: string): string {
+    const hasCyrillic = /[а-яА-ЯёЁ]/.test(text)
+    const hasKazakh = /[құғәіңүөһҚҰҒӘІҢҮӨҺ]/.test(text)
+    const hasEnglish = /[a-zA-Z]/.test(text)
+    
+    if (hasKazakh) return 'kk'
+    if (hasCyrillic) return 'ru'
+    if (hasEnglish) return 'en'
+    return 'ru' // fallback
+  }
+
+  const realLocale = detectLanguage(message)
+  
+  const languageMap: Record<string, string> = {
+    ru: 'русском',
+    kk: 'казахском',
+    en: 'английском'
+  }
+  const targetLanguage = languageMap[realLocale] || 'русском'
+
+  // === ВАШИ КНИГИ (без изменений) ===
   const booksList = [
     { title: "1984", author: "George Orwell", year: 1949, available: 2 },
     { title: "О дивный новый мир", author: "Aldous Huxley", year: 1932, available: 2 },
@@ -24,56 +45,30 @@ export default defineEventHandler(async (event) => {
     { title: "Убить пересмешника", author: "Harper Lee", year: 1960, available: 3 }
   ]
 
-  // Формируем текстовое описание книг для промпта
   const booksDescription = booksList.map(book => 
-    `- "${book.title}", Автор: ${book.author}, Год: ${book.year}, Доступно экземпляров: ${book.available}`
+    `- "${book.title}", Автор: ${book.author}, Год: ${book.year}, Доступно: ${book.available}`
   ).join('\n')
 
-  const languageMap: Record<string, string> = {
-    ru: 'русском',
-    kk: 'казахском',
-    en: 'английском'
-  }
-  const targetLanguage = languageMap[locale] || 'русском'
+  // ЖЁСТКИЙ ПРОМПТ С ТРЕБОВАНИЕМ ЯЗЫКА
+  const systemPrompt = `Ты — помощник библиотеки. Отвечай строго на ${targetLanguage} языке.
+Никогда не используй казахский, если вопрос на русском. Никогда не используй русский, если вопрос на казахском.
+Не выводи <think>, не ссылайся на сайты, не выдумывай книги.
+Отвечай кратко и по фактам из списка ниже.
 
-  const systemPrompt = `You are a university library assistant.
-Answer only questions related to the library, university, or books.
-Politely refuse off-topic questions.
-
-**Output rules:**
-- Do NOT output any <think> or <thinking> tags. Never show your internal reasoning.
-- Respond directly and concisely, without preambles like "Of course!" or "Certainly!".
-- You MUST respond in ${targetLanguage} language (the user's language: Kazakh, Russian, or English).
-- **ABSOLUTELY DO NOT include any URLs, links, domain names, or website addresses.**
-- Do not tell users to visit a specific website.
-
-**Library facts:**
-- Hours: Mon–Fri 9:00–20:00, Sat 10:00–18:00, Sun closed.
-- Registration: there is a "Register" button on the website.
-- Book limit: 5 books for up to 30 days.
-- Renewal/return: at the library or in personal account.
-- Fine for overdue: 50 tenge per day.
-- E-books: "Read online" button on the book page.
-- Room booking: there is a "Book a room" section.
-
-**List of ALL books in the library (exactly 8 books) with availability:**
+Список книг:
 ${booksDescription}
 
-**Instructions for book questions:**
-- Answer based ONLY on the book list above. Do not invent books not in this list.
-- If user asks for recommendations by genre, author, or topic, select matching books from the list.
-- If user asks about availability, tell the number of copies available.
-- If nothing matches, say: "Sorry, we don't have that book in our collection. You can suggest a purchase."
-- Keep answers short and helpful.`
+Часы работы: Пн-Пт 9-20, Сб 10-18, Вс выходной.
+Правила: 5 книг на 30 дней, штраф 50 тг/день, регистрация на сайте.`
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'qwen/qwen3-32b',
+      model: 'llama-3.3-70b-versatile', // Более послушная модель
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      temperature: 0.6,
+      temperature: 0.3, // снижаем вариативность
       max_tokens: 500
     })
 
@@ -81,12 +76,9 @@ ${booksDescription}
     reply = reply.replace(/https?:\/\/[^\s]+/g, '')
     reply = reply.replace(/www\.[^\s]+/g, '')
     reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim()
-    reply = reply.replace(/^\s+/, '')
     return { reply }
   } catch (error: any) {
     console.error('AI API Error:', error)
-    return {
-      reply: 'Извините, сервис временно недоступен. Пожалуйста, попробуйте позже.'
-    }
+    return { reply: 'Сервис временно недоступен. Попробуйте позже.' }
   }
 })
