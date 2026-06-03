@@ -6,9 +6,10 @@ export default defineEventHandler(async (event) => {
   const search = (query.search as string | undefined)?.trim();
 
   const pool = getPool();
-
-  let sql =
-    "SELECT id, title, author, available_copies, total_copies, year FROM books";
+  let sql = `
+    SELECT id, title, author, available_copies, total_copies, year, cover_url
+    FROM books
+  `;
   const params: string[] = [];
 
   if (search) {
@@ -17,7 +18,6 @@ export default defineEventHandler(async (event) => {
   }
 
   sql += " ORDER BY title ASC";
-
   const result = await pool.query(sql, params);
   return result.rows;
 });

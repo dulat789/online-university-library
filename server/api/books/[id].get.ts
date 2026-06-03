@@ -1,20 +1,23 @@
-import { defineEventHandler, getQuery } from "h3";
+import { defineEventHandler, getRouterParam, createError } from "h3";
 import { getPool } from "~/server/db/index";
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const search = (query.search as string | undefined)?.trim();
+  const id = getRouterParam(event, "id");
 
-  const pool = getPool();
-  let sql = "SELECT id, title, author, available_copies, total_copies, year FROM books";
-  const params: string[] = [];
-
-  if (search) {
-    sql += " WHERE title ILIKE $1 OR author ILIKE $1";
-    params.push(`%${search}%`);
+  if (!id || isNaN(parseInt(id))) {
+    throw createError({ statusCode: 400, statusMessage: "Invalid book ID" });
   }
 
-  sql += " ORDER BY title ASC";
-  const result = await pool.query(sql, params);
-  return result.rows;
+  const pool = getPool();
+  const result = await pool.query(
+    `SELECT id, title, author, description, year, total_copies, available_copies, cover_url
+     FROM books WHERE id = $1`,
+    [parseInt(id)]
+  );
+
+  if (!result.rows[0]) {
+    throw createError({ statusCode: 404, statusMessage: "Book not found" });
+  }
+
+  return result.rows[0];
 });
