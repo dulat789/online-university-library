@@ -7,11 +7,11 @@
       <img
         v-if="book.cover_url"
         :src="book.cover_url"
-        :alt="localizedTitle"
+        :alt="book.title"
         class="w-full h-48 object-cover rounded-t"
       />
       <h3 class="font-semibold text-base line-clamp-2 leading-snug mt-2">
-        {{ localizedTitle }}
+        {{ book.title }}
       </h3>
     </template>
 
@@ -48,6 +48,4 @@
 import type { Book } from "~/types/book";
 
 const props = defineProps<{ book: Book }>();
-
-const { localizedTitle } = useBookLocale(computed(() => props.book.title));
 </script>
