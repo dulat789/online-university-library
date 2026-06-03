@@ -5,8 +5,8 @@
   >
     <template #header>
       <img
-        v-if="COVER_MAP[book.title]"
-        :src="COVER_MAP[book.title]"
+        v-if="book.cover_url"
+        :src="book.cover_url"
         :alt="localizedTitle"
         class="w-full h-48 object-cover rounded-t"
       />
@@ -50,15 +50,4 @@ import type { Book } from "~/types/book";
 const props = defineProps<{ book: Book }>();
 
 const { localizedTitle } = useBookLocale(computed(() => props.book.title));
-
-const COVER_MAP: Record<string, string> = {
-  "1984": "/covers/1984.webp",
-  "Brave New World": "/covers/brave_new_world.jpeg",
-  "The Catcher in the Rye": "/covers/catcher_in_the_rye.jpeg",
-  "Crime and Punishment": "/covers/crime_and_punishment.jpeg",
-  "The Hobbit": "/covers/hobbit.jpeg",
-  "Pride and Prejudice": "/covers/pride_and_prejudice.jpeg",
-  "The Great Gatsby": "/covers/the_great_gatsby.jpeg",
-  "To Kill a Mockingbird": "/covers/to_kill_mockingbird.jpeg",
-};
 </script>
