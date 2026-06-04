@@ -1,3 +1,4 @@
+// server/utils/auth.ts
 import jwt from "jsonwebtoken";
 import { getCookie, createError } from "h3";
 import type { H3Event } from "h3";
@@ -20,7 +21,8 @@ function verifyToken(token: string): JWTPayload {
 }
 
 export function requireAuth(event: H3Event): JWTPayload {
-  const token = getCookie(event, "auth_token");
+  // Пробуем оба возможных имени куки
+  let token = getCookie(event, "auth_token") || getCookie(event, "token");
   if (!token) {
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
